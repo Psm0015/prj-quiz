@@ -3,6 +3,8 @@ package org.senai.prjquiz.controller;
 import java.util.Optional;
 
 import org.senai.prjquiz.entity.Quiz;
+import org.senai.prjquiz.entity.placar;
+import org.senai.prjquiz.repository.PlacarRepository;
 import org.senai.prjquiz.repository.QuizRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,6 +25,9 @@ public class QuizController {
 
     @Autowired
     QuizRepository qRepository;
+
+    @Autowired
+    PlacarRepository pRepository;
 
     @PostMapping("/")
     public @ResponseBody Integer addQuiz(@RequestBody Quiz objQuiz) {
@@ -50,6 +55,16 @@ public class QuizController {
     @GetMapping("/{id}")
     public @ResponseBody Optional<Quiz> localizarQuiz(@PathVariable Integer id) {
         return qRepository.findById(id);
+    }
+
+    @GetMapping("/placar")
+    public @ResponseBody Iterable<placar> buscarplacar(){
+        return pRepository.findAll();
+    }
+    @PostMapping("/placar")
+    public @ResponseBody String addplacar(@RequestBody placar novo){
+        pRepository.save(novo);
+        return "adicionado com sucesso!";
     }
 
 }

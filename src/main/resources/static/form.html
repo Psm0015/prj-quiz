@@ -99,6 +99,7 @@
         </table>
     </div>
     <script>
+
         let baseQuiz = "";
         xhttp = new XMLHttpRequest();
         function buscarQuiz() {
@@ -111,9 +112,9 @@
         buscarQuiz();
 
         function gravarQuiz(quiz) {
-            
+
             // alert(JSON.stringify(quiz));
-            
+
             xhttp.open("PUT", "/api/quiz/");
             xhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
             xhttp.send(JSON.stringify(quiz));
@@ -216,12 +217,12 @@
                 alerta.classList.add("alert-success");
             }
 
-            
+
 
             // console.log(quiz);
             if (id != "") {
                 quiz.id = id;
-            } 
+            }
             console.log(quiz);
             gravarQuiz(quiz);
             // localStorage.setItem('baseQuiz', JSON.stringify(baseQuiz));
@@ -266,12 +267,24 @@
 
         function apagar() {
             let id = document.getElementById("id").value;
-            if(id == ""){
+            if (id == "") {
                 alerta.innerHTML = "Necessário selecionar uma pergunta!";
                 alerta.classList.add("alert-danger");
-                return ;
+                return;
             }
             if (confirm("Tem certeza que quer apagar essa pergunda?")) {
+                const xhr = new XMLHttpRequest();
+                xhr.withCredentials = true;
+
+                xhr.addEventListener("readystatechange", function () {
+                    if (this.readyState === this.DONE) {
+                        console.log(this.responseText);
+                    }
+                });
+
+                xhr.open("DELETE", "http://localhost:8080/api/quiz/" + id);
+
+                xhr.send();
                 baseQuiz.splice(id, 1);
                 localStorage.setItem('baseQuiz', JSON.stringify(baseQuiz));
                 limparForm();

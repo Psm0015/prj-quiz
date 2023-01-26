@@ -16,7 +16,7 @@
             text-align: center;
         }
 
-        h2 {
+        .titulop {
             background-color: cadetblue;
             padding: 15px;
             border-radius: 15px;
@@ -47,7 +47,7 @@
 
     <div class="container">
         <h1>Quiz do SENAI</h1>
-        <h2>
+        <h2 class="titulop">
             Nenhuma pergunta registrada?
         </h2>
         <h3>
@@ -73,11 +73,31 @@
             Reiniciar
         </div>
     </div>
+    <script src="//cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.3.js"
+        integrity="sha256-nQLuAZGRRcILA+6dMBOvcRh5Pe310sBpanc6+QBmyVM=" crossorigin="anonymous"></script>
     <script>
+        function pegarnome() {
+            console.log("oi")
+            Swal.fire({
+                title: 'Qual o seu nome?',
+                input: 'text',
+                inputAttributes: {
+                    autocapitalize: 'off'
+                },
+                showCancelButton: false,
+                confirmButtonText: 'Começar',
+                preConfirm: (login) => {
+                    sessionStorage.setItem("nome", login);
+                },
+                allowOutsideClick: () => !Swal.isLoading()
+            })
+        }
         let placar = {
             acertos: 0,
             erros: 0
         }
+        pegarnome();
         function verificarResposta(i) {
             if (quiz.ponto >= 0) return;
 
@@ -91,8 +111,8 @@
                 placar.erros += 1;
             }
         }
-        
-        
+
+
         let lsPergunta = [];
         let quizAtual = 0;
         let quiz = {};
@@ -108,24 +128,24 @@
         buscarQuiz();
 
         function iniciarQuiz(apiQuiz) {
-            
+
             lsPergunta = JSON.parse(apiQuiz);
             embaralharPerguntas();
             carregarQuiz(quizAtual);
         }
 
         function carregarQuiz(nPergunta) {
-                embaralharRespotas(nPergunta);
-                quiz = lsPergunta[nPergunta];
-                document.querySelector('h2').innerHTML = quiz.pergunta;
-                for (let i = 0; i < 4; i++) {
-                    document.querySelectorAll('h3')[i].style.backgroundColor = '#cccccc';
-                    document.querySelectorAll('h3')[i].innerHTML = quiz.respostas[i];
-                    let x = i;
-                    document.querySelectorAll('h3')[i].addEventListener(
-                        'click', () => { verificarResposta(x) });
-                }
+            embaralharRespotas(nPergunta);
+            quiz = lsPergunta[nPergunta];
+            document.querySelector('h2').innerHTML = quiz.pergunta;
+            for (let i = 0; i < 4; i++) {
+                document.querySelectorAll('h3')[i].style.backgroundColor = '#cccccc';
+                document.querySelectorAll('h3')[i].innerHTML = quiz.respostas[i];
+                let x = i;
+                document.querySelectorAll('h3')[i].addEventListener(
+                    'click', () => { verificarResposta(x) });
             }
+        }
 
         function next() {
             // console.log(quizAtual);
@@ -143,7 +163,25 @@
         }
 
         function fimQuiz() {
-            document.querySelector('h2').innerHTML = 'Resultado do Quiz';
+            const data = JSON.stringify({
+                "nome": `${sessionStorage.getItem("nome")}`,
+                "acertos": `${placar.acertos}`
+            });
+
+            const xhr = new XMLHttpRequest();
+            xhr.withCredentials = true;
+
+            xhr.addEventListener("readystatechange", function () {
+                if (this.readyState === this.DONE) {
+                    console.log(this.responseText);
+                }
+            });
+
+            xhr.open("POST", "http://localhost:8080/api/quiz/placar");
+            xhr.setRequestHeader("Content-Type", "application/json");
+
+            xhr.send(data);
+            document.querySelector('h2').innerHTML = `Resultado de ${sessionStorage.getItem("nome")}`;
             document.querySelectorAll('h3')[0].innerHTML = `Acertos: ${placar.acertos}`;
             document.querySelectorAll('h3')[1].innerHTML = `Erros: ${placar.erros}`;
 
